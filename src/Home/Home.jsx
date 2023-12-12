@@ -1,10 +1,24 @@
-import React, { useState, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 import './Home.css'
 import Homebg from '../assets/homebg.png'
+import Send from '../assets/sendbtn.png'
+import SendDisabled from '../assets/sendbtndisabled.png'
 import Lockimg from '../assets/lock.png'
 import Modal from 'react-modal';
 
 const Home = () => {
+
+    let subtitle;
+    const [modalIsOpen, setIsOpen] = React.useState(false);
+    const [groupName, setGroupName] = useState('');
+    const [error, setError] = useState('');
+    const [selectedColor, setSelectedColor] = useState('');
+    const [notes, setNotes] = useState([]);
+    const [notesname, setNotesName] = useState('');
+    const [selectedItemIndex, setSelectedItemIndex] = useState(null);
+    const [selectedNote, setSelectedNote] = useState(null);
+    const [textValue, setTextValue] = useState('');
+    const [typedNotes, setTypedNotes] = useState([]);
 
     const customStyles = {
         overlay: {
@@ -22,9 +36,6 @@ const Home = () => {
         },
     };
 
-    let subtitle;
-    const [modalIsOpen, setIsOpen] = React.useState(false);
-
     function openModal() {
         setIsOpen(true);
     }
@@ -37,31 +48,82 @@ const Home = () => {
         setIsOpen(false);
     }
 
-    const [groupName, setGroupName] = useState('');
-    const [error, setError] = useState('');
-    const [selectedColor, setSelectedColor] = useState('');
-    const groupNameRef = useRef('');
-    const selectedColorRef = useRef('');
-
-
     const handleColorSelection = (color) => {
-        selectedColorRef.current = color;
+        setSelectedColor(color);
     };
 
     const handleSubmit = (e) => {
-        e.preventDefault();
+        e.preventDefault()
 
-        if (groupNameRef == '') {
-            setError('Please enter group name')
-        } else if (selectedColorRef == '') {
-            setError('Please select color')
+        const newGroupName = groupName.trim();
+        const newSelectedColor = selectedColor;
+        const isGroupNameExists = notes.filter((note) => note.groupName === newGroupName);
+
+        if (!newGroupName) {
+            setError('Please enter group name');
+        } else if (isGroupNameExists.length > 0) {
+            setError('Group name already exists')
+        } else if (!newSelectedColor) {
+            setError('Please choose color');
         } else {
-            setError('')
-            setGroupName(groupNameRef.current);
-            setSelectedColor(selectedColorRef.current);
-            setIsOpen(false);
+            try {
+                const initials = newGroupName
+                    .split(' ')
+                    .slice(0, 2)
+                    .map(word => word.charAt(0).toUpperCase())
+                    .join('');
+
+                const newNote = { groupName: newGroupName, selectedColor: newSelectedColor, notesname: initials }
+                const existingNotes = JSON.parse(localStorage.getItem('notes')) || [];
+                const updatedNotes = [...existingNotes, newNote]
+
+                localStorage.setItem('notes', JSON.stringify(updatedNotes))
+                setNotes(updatedNotes);
+                setNotesName('')
+                setGroupName('');
+                setSelectedColor('');
+                setError('');
+                setIsOpen(false)
+            } catch (error) {
+                alert('Error storing notes:', error);
+            }
         }
     };
+
+    useEffect(() => {
+        try {
+            const existingNotes = JSON.parse(localStorage.getItem('notes')) || [];
+            setNotes(existingNotes);
+        } catch (error) {
+            alert('Error fetching notes from local storage:', error);
+        }
+    }, []);
+
+    const openNotesInfo = (index, color) => {
+        setSelectedItemIndex(index)
+        setSelectedNote(notes[index]);
+    }
+
+    const handleTextChange = (event) => {
+        setTextValue(event.target.value);
+    };
+
+    const sendTypedNotes = () => {
+        if (textValue.trim() !== '') {
+            const currentDate = new Date();
+            const formattedDate = currentDate.toLocaleDateString();
+            const formattedTime = currentDate.toLocaleTimeString();
+
+            const newTypedNote = {
+                text: textValue,
+                date: formattedDate,
+                time: formattedTime,
+            };
+
+            setTypedNotes((prevNotes) => [...prevNotes, newTypedNote]);
+            setTextValue('');
+        }
+    }
 
     return (
         <div>
@@ -71,10 +133,21 @@ const Home = () => {
                         <h1>Pocket Notes</h1>
                     </div>
                     <div className='notes_list'>
+
                         <div className='notes_listdiv'>
-                            <div style={{ backgroundColor: selectedColor, width: '3rem', height: '3rem', borderRadius: '100%' }}></div>
-                            <div>{groupName}</div>
+                            {notes.map((note, index) => (
+                                <div key={index} className='notes_container' onClick={() => openNotesInfo(index)} style={{ backgroundColor: selectedItemIndex === index ? '#2F2F2F2B' : '' }}>
+                                    <div style={{ backgroundColor: note.selectedColor, width: '3rem', height: '3rem', borderRadius: '100%', color: '#ffffff' }}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                                            {note.notesname}
+                                        </div>
+                                    </div>
+
+                                    <div>{note.groupName}</div>
+                                </div>
+                            ))}
                         </div>
+
                     </div>
                     <div className='btnadd_notes'>
                         <button className='btnadd' onClick={openModal}>+</button>
@@ -89,21 +162,21 @@ const Home = () => {
                             <div className='sub_title'>
                                 <h2 ref={(_subtitle) => (subtitle = _subtitle)}>Create New group</h2>
                             </div>
-                            <form onSubmit={handleSubmit}>
+                            <form onSubmit={handleSubmit} >
                                 <div className='group_name'>
                                     <label>Group Name</label>
-                                    <input type='text' placeholder='Enter group name' value={groupNameRef.current}
-                                        onChange={(e) => (groupNameRef.current = e.target.value)} />
+                                    <input type='text' placeholder='Enter group name' value={groupName}
+                                        onChange={(e) => setGroupName(e.target.value)} />
                                 </div>
                                 <div className='choose_color'>
                                     <label>Choose colour</label>
                                     <div className='choose_color_div'>
-                                        <button id='color-one' onClick={() => handleColorSelection('#B38BFA')}></button>
-                                        <button id='color-two' onClick={() => handleColorSelection('#FF79F2')}></button>
-                                        <button id='color-three' onClick={() => handleColorSelection('#43E6FC')}></button>
-                                        <button id='color-four' onClick={() => handleColorSelection('#F19576')}></button>
-                                        <button id='color-five' onClick={() => handleColorSelection('#0047FF')}></button>
-                                        <button id='color-six' onClick={() => handleColorSelection('#6691FF')}></button>
+                                        <button id='color-one' type='button' onClick={() => handleColorSelection('#B38BFA')}></button>
+                                        <button id='color-two' type='button' onClick={() => handleColorSelection('#FF79F2')}></button>
+                                        <button id='color-three' type='button' onClick={() => handleColorSelection('#43E6FC')}></button>
+                                        <button id='color-four' type='button' onClick={() => handleColorSelection('#F19576')}></button>
+                                        <button id='color-five' type='button' onClick={() => handleColorSelection('#0047FF')}></button>
+                                        <button id='color-six' type='button' onClick={() => handleColorSelection('#6691FF')}></button>
                                     </div>
                                 </div>
                                 <div style={{ color: 'red' }}>{error}</div>
@@ -112,23 +185,84 @@ const Home = () => {
                                 </div>
                             </form>
                         </Modal>
+
                     </div>
                 </div>
 
-                <div className='home_page_div'>
-                    <div className='home_page'>
-                        <img src={Homebg} alt="homebg" />
-                        <h1>Pocket Notes</h1>
-                        <p>
-                            Send and receive messages without keeping your phone online.
-                            Use Pocket Notes on up to 4 linked devices and 1 mobile phone
-                        </p>
+                {selectedItemIndex !== null ? (
+                    <div className='note_page_div'>
+                        {selectedNote && (
+                            <div className='notes_nav'>
+                                <div style={{ backgroundColor: selectedNote.selectedColor, width: '3rem', height: '3rem', borderRadius: '100%', }}>
+                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                                        {selectedNote.notesname}
+                                    </div>
+                                </div>
+                                <div>
+                                    {selectedNote.groupName}
+                                </div>
+                            </div>
+                        )}
+
+
+                        <div className='notestextTypedArea'>
+
+                            {typedNotes.length !== 0 ? (typedNotes.map((note, index) => (
+                                <div key={index} className='noteCard'>
+                                    <div className='typed_notes'>
+                                        {note.text}
+                                    </div>
+                                    <div className='date_time'>
+                                        <div>
+                                            {note.date}
+                                        </div>
+                                        <div className='dot'></div>
+                                        <div>
+                                            {note.time}
+                                        </div>
+                                    </div>
+                                </div>
+                            ))) : (<div style={{ width: '100%', textAlign: 'center' }}>
+                                Start writing notes here
+                            </div>)}
+
+                        </div>
+
+                        <div className='text_area'>
+                            <div className='texttype_area'>
+                                <div className='input_text'>
+                                    <textarea type="text" value={textValue} onChange={handleTextChange} placeholder='Enter your text here...........' />
+                                </div>
+
+                                <div className='send_button'>
+                                    <button>
+                                        {textValue ? (
+                                            <img src={Send} alt="send button" onClick={sendTypedNotes} />
+                                        ) : (
+                                            <img src={SendDisabled} alt="send button" />
+                                        )}
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div className='encrypted_div'>
-                        <img src={Lockimg} alt="encrypted" />
-                        <p>end-to-end encrypted</p>
+                ) : (
+                    <div className='home_page_div'>
+                        <div className='home_page'>
+                            <img src={Homebg} alt="homebg" />
+                            <h1>Pocket Notes</h1>
+                            <p>
+                                Send and receive messages without keeping your phone online.
+                                Use Pocket Notes on up to 4 linked devices and 1 mobile phone
+                            </p>
+                        </div>
+                        <div className='encrypted_div'>
+                            <img src={Lockimg} alt="encrypted" />
+                            <p>end-to-end encrypted</p>
+                        </div>
                     </div>
-                </div>
+                )}
+
             </div>
         </div>
     )
