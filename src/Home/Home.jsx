@@ -14,7 +14,6 @@ const Home = () => {
     const [error, setError] = useState('');
     const [selectedColor, setSelectedColor] = useState('');
     const [notes, setNotes] = useState([]);
-    const [notesname, setNotesName] = useState('');
     const [selectedItemIndex, setSelectedItemIndex] = useState(null);
     const [selectedNote, setSelectedNote] = useState(null);
     const [textValue, setTextValue] = useState('');
@@ -73,13 +72,12 @@ const Home = () => {
                     .map(word => word.charAt(0).toUpperCase())
                     .join('');
 
-                const newNote = { groupName: newGroupName, selectedColor: newSelectedColor, notesname: initials }
+                const newNote = { groupName: newGroupName, selectedColor: newSelectedColor, notesname: initials, typednotes: [] }
                 const existingNotes = JSON.parse(localStorage.getItem('notes')) || [];
                 const updatedNotes = [...existingNotes, newNote]
 
                 localStorage.setItem('notes', JSON.stringify(updatedNotes))
                 setNotes(updatedNotes);
-                setNotesName('')
                 setGroupName('');
                 setSelectedColor('');
                 setError('');
@@ -111,8 +109,14 @@ const Home = () => {
     const sendTypedNotes = () => {
         if (textValue.trim() !== '') {
             const currentDate = new Date();
-            const formattedDate = currentDate.toLocaleDateString();
-            const formattedTime = currentDate.toLocaleTimeString();
+
+            const day = currentDate.getDate();
+            const month = new Intl.DateTimeFormat('en-US', { month: 'short' }).format(currentDate);
+            const year = currentDate.getFullYear();
+            const formattedDate = `${day} ${month} ${year}`;
+
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: true };
+            const formattedTime = new Intl.DateTimeFormat('en-US', timeOptions).format(currentDate);
 
             const newTypedNote = {
                 text: textValue,
@@ -120,10 +124,27 @@ const Home = () => {
                 time: formattedTime,
             };
 
-            setTypedNotes((prevNotes) => [...prevNotes, newTypedNote]);
+            const updatedTypedNotes = [...typedNotes, newTypedNote]
+            setTypedNotes(updatedTypedNotes);
+
+            const existingNotes = JSON.parse(localStorage.getItem('notes')) || [];
+            existingNotes[selectedItemIndex].typednotes = updatedTypedNotes;
+            localStorage.setItem('notes', JSON.stringify(existingNotes));
+
             setTextValue('');
+
         }
     }
+
+    useEffect(() => {
+        try {
+            const existingNotes = JSON.parse(localStorage.getItem('notes')) || [];
+            const updatedExistingNotes = existingNotes[selectedItemIndex]?.typednotes || []
+            setTypedNotes(updatedExistingNotes);
+        } catch (error) {
+            alert('Error fetching notes from local storage:', error);
+        }
+    }, [selectedItemIndex]);
 
     return (
         <div>
