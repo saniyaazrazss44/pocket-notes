@@ -210,79 +210,82 @@ const Home = () => {
                     </div>
                 </div>
 
-                {selectedItemIndex !== null ? (
-                    <div className='note_page_div'>
-                        {selectedNote && (
-                            <div className='notes_nav'>
-                                <div style={{ backgroundColor: selectedNote.selectedColor, width: '3rem', height: '3rem', borderRadius: '100%', }}>
-                                    <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
-                                        {selectedNote.notesname}
-                                    </div>
-                                </div>
-                                <div>
-                                    {selectedNote.groupName}
-                                </div>
-                            </div>
-                        )}
-
-
-                        <div className='notestextTypedArea'>
-
-                            {typedNotes.length !== 0 ? (typedNotes.map((note, index) => (
-                                <div key={index} className='noteCard'>
-                                    <div className='typed_notes'>
-                                        {note.text}
-                                    </div>
-                                    <div className='date_time'>
-                                        <div>
-                                            {note.date}
-                                        </div>
-                                        <div className='dot'></div>
-                                        <div>
-                                            {note.time}
+                <div className='homeNote_div'>
+                    {selectedItemIndex !== null ? (
+                        <div className='note_page_div'>
+                            {selectedNote && (
+                                <div className='notes_nav'>
+                                    <div style={{ backgroundColor: selectedNote.selectedColor, width: '3rem', height: '3rem', borderRadius: '100%', }}>
+                                        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
+                                            {selectedNote.notesname}
                                         </div>
                                     </div>
+                                    <div>
+                                        {selectedNote.groupName}
+                                    </div>
                                 </div>
-                            ))) : (<div style={{ width: '100%', textAlign: 'center' }}>
-                                Start writing notes here
-                            </div>)}
+                            )}
 
-                        </div>
 
-                        <div className='text_area'>
-                            <div className='texttype_area'>
-                                <div className='input_text'>
-                                    <textarea type="text" value={textValue} onChange={handleTextChange} placeholder='Enter your text here...........' />
-                                </div>
+                            <div className='notestextTypedArea'>
 
-                                <div className='send_button'>
-                                    <button>
-                                        {textValue ? (
-                                            <img src={Send} alt="send button" onClick={sendTypedNotes} />
-                                        ) : (
-                                            <img src={SendDisabled} alt="send button" />
-                                        )}
-                                    </button>
+                                {typedNotes.length !== 0 ? (typedNotes.map((note, index) => (
+                                    <div key={index} className='noteCard'>
+                                        <div className='typed_notes'>
+                                            {note.text}
+                                        </div>
+                                        <div className='date_time'>
+                                            <div>
+                                                {note.date}
+                                            </div>
+                                            <div className='dot'></div>
+                                            <div>
+                                                {note.time}
+                                            </div>
+                                        </div>
+                                    </div>
+                                ))) : (<div style={{ width: '100%', textAlign: 'center' }}>
+                                    Start writing notes here
+                                </div>)}
+
+                            </div>
+
+                            <div className='text_area'>
+                                <div className='texttype_area'>
+                                    <div className='input_text'>
+                                        <textarea type="text" value={textValue} onChange={handleTextChange} placeholder='Enter your text here...........' />
+                                    </div>
+
+                                    <div className='send_button'>
+                                        <button>
+                                            {textValue ? (
+                                                <img src={Send} alt="send button" onClick={sendTypedNotes} />
+                                            ) : (
+                                                <img src={SendDisabled} alt="send button" />
+                                            )}
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className='home_page_div'>
-                        <div className='home_page'>
-                            <img src={Homebg} alt="homebg" />
-                            <h1>Pocket Notes</h1>
-                            <p>
-                                Send and receive messages without keeping your phone online.
-                                Use Pocket Notes on up to 4 linked devices and 1 mobile phone
-                            </p>
+                    ) : (
+                        <div className='home_page_div'>
+                            <div className='home_page'>
+                                <img src={Homebg} alt="homebg" />
+                                <h1>Pocket Notes</h1>
+                                <p>
+                                    Send and receive messages without keeping your phone online.
+                                    Use Pocket Notes on up to 4 linked devices and 1 mobile phone
+                                </p>
+                            </div>
+                            <div className='encrypted_div'>
+                                <img src={Lockimg} alt="encrypted" />
+                                <p>end-to-end encrypted</p>
+                            </div>
                         </div>
-                        <div className='encrypted_div'>
-                            <img src={Lockimg} alt="encrypted" />
-                            <p>end-to-end encrypted</p>
-                        </div>
-                    </div>
-                )}
+                    )}
+                </div>
+
 
             </div>
         </div>
