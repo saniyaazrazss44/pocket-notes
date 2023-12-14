@@ -18,8 +18,9 @@ const Home = () => {
     const [selectedNote, setSelectedNote] = useState(null);
     const [textValue, setTextValue] = useState('');
     const [typedNotes, setTypedNotes] = useState([]);
+    const [showSidebar, setShowSidebar] = useState(true);
 
-    const customStyles = {
+    const [customStyles, setCustomStyles] = useState({
         overlay: {
             backgroundColor: 'rgba(0, 0, 0, 0.5)',
         },
@@ -33,7 +34,34 @@ const Home = () => {
             backgroundColor: '#ffffff',
             width: '35%'
         },
-    };
+    })
+
+    useEffect(() => {
+        const handleSize = () => {
+            if (window.innerWidth <= 768) {
+                setCustomStyles({
+                    ...customStyles, content: {
+                        ...customStyles.content,
+                        width: '80%',
+                    }
+                })
+            } else {
+                setCustomStyles({
+                    ...customStyles, content: {
+                        ...customStyles.content,
+                        width: '35%',
+                    }
+                })
+            }
+
+        }
+        window.addEventListener('resize', handleSize);
+        handleSize()
+
+        return () => {
+            window.removeEventListener('resize', handleSize);
+        };
+    }, [])
 
     function openModal() {
         setIsOpen(true);
@@ -97,9 +125,11 @@ const Home = () => {
         }
     }, []);
 
-    const openNotesInfo = (index, color) => {
+    const openNotesInfo = (index) => {
         setSelectedItemIndex(index)
         setSelectedNote(notes[index]);
+        setShowSidebar(!showSidebar);
+
     }
 
     const handleTextChange = (event) => {
@@ -149,6 +179,26 @@ const Home = () => {
     return (
         <div>
             <div className='home_div'>
+                <style>
+                    {`
+                    @media screen and (max-width: 768px) {
+                        .sidebar {
+                            display: ${showSidebar ? 'flex' : 'none'};
+                            width: ${showSidebar ? '100%' : '0'};
+                        }
+
+                        .homeNote_div {
+                            display: ${showSidebar ? 'none' : 'flex'};
+                            width: ${showSidebar ? '0' : '100vw'};
+                        }
+
+                        .note_page_div{
+                            display: ${showSidebar ? 'none' : 'flex'};
+                            width: ${showSidebar ? '0' : '100%'};
+                        }
+                    }
+                `}
+                </style>
                 <div className='sidebar'>
                     <div className='sidebar_title'>
                         <h1>Pocket Notes</h1>
