@@ -19,6 +19,7 @@ const Home = () => {
     const [textValue, setTextValue] = useState('');
     const [typedNotes, setTypedNotes] = useState([]);
     const [showSidebar, setShowSidebar] = useState(true);
+    // const [sidebarVisible, setSidebarVisible] = useState(true);
 
     const [customStyles, setCustomStyles] = useState({
         overlay: {
@@ -176,6 +177,10 @@ const Home = () => {
         }
     }, [selectedItemIndex]);
 
+    const homePage = () => {
+        setShowSidebar(!showSidebar)
+    }
+
     return (
         <div>
             <div className='home_div'>
@@ -192,14 +197,14 @@ const Home = () => {
                             width: ${showSidebar ? '0' : '100vw'};
                         }
 
-                        .note_page_div{
+                        .note_page_div {
                             display: ${showSidebar ? 'none' : 'flex'};
                             width: ${showSidebar ? '0' : '100%'};
-                        }
+                        }                       
                     }
                 `}
                 </style>
-                <div className='sidebar'>
+                <div className={`sidebar ${showSidebar ? 'visible' : 'hidden'}`}>
                     <div className='sidebar_title'>
                         <h1>Pocket Notes</h1>
                     </div>
@@ -265,6 +270,9 @@ const Home = () => {
                         <div className='note_page_div'>
                             {selectedNote && (
                                 <div className='notes_nav'>
+                                    <div className='back_arrow'>
+                                        <i onClick={homePage} class="fa-solid fa-arrow-left" style={{ color: '#ffffff' }}></i>
+                                    </div>
                                     <div style={{ backgroundColor: selectedNote.selectedColor, width: '3rem', height: '3rem', borderRadius: '100%', }}>
                                         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', width: '100%', height: '100%' }}>
                                             {selectedNote.notesname}

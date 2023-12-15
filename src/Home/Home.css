@@ -393,6 +393,10 @@
     cursor: pointer;
 }
 
+.back_arrow {
+    display: none;
+}
+
 @media screen and (max-width:1150px) {
 
     .sidebar {
@@ -457,5 +461,9 @@
 
     .group_name input {
         width: 100%;
+    }
+
+    .back_arrow {
+        display: block;
     }
 }
